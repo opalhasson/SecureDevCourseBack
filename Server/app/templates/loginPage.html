@@ -191,6 +191,9 @@
 
 
 
+
+
+
     </style>
 </head>
 
@@ -205,7 +208,7 @@
     <!-- sign-up section -->
     <section class="sign-up">
 
-        <form class="sign-up-para" action="/new-user" method="GET">
+        <form class="sign-up-para" action="register/" method="GET">
             <input class="submit-btn" type="submit" value="NEW USER">
             Join to our community !
         </form>
@@ -227,9 +230,17 @@
             </div>
 
             <input class="submit-btn" type="submit" value="LOGIN">
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-danger">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
         </form>
 
-        <form class="sign-up-form" action="/forgot-password" method="GET">
+
+        <form class="sign-up-form" action="forgot_password/" method="GET">
             <input class="submit-btn" type="submit" value="Forgot Password">
         </form>
 
