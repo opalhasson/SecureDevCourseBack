@@ -5,10 +5,15 @@ from django.http import HttpResponse
 from django.contrib.auth.models import User
 import hashlib
 import hmac
+import smtplib
 from django.shortcuts import render
 from django.contrib import messages
-from .ClientForm import ClientForm
 from .PasswordConfig import PasswordConfig
+import random
+
+from django.shortcuts import render
+from django.core.mail import EmailMessage
+from django.conf import settings
 
 username_login = ""
 
@@ -32,7 +37,7 @@ def register(request):
 
             if User.objects.get_by_natural_key(username) is not None:
                 # Optionally, you can perform additional actions with the created user
-                username_login =  username._str__()
+                username_login = username.__str__()
                 return render(request, 'systemScreenPage.html')
             else:
                 return HttpResponse("Invalid request method")
@@ -52,7 +57,7 @@ def login(request):
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            username_login = username._str__()
+            username_login = username.__str__()
             # User is authenticated, log them in
             return render(request, 'systemScreenPage.html')
         else:
@@ -68,7 +73,7 @@ def change_pass(request):
 
 def add_client(request):
     if request.method == 'POST':
-        form = ClientForm(request.POST)
+        form = 1  # ClientForm(request.POST)
         if form.is_valid():
             form.save()
             return render(request, 'systemScreenPage.html')
@@ -80,36 +85,127 @@ def gen_otp(request):
     return HttpResponse("Generate one-time password")
 
 
+# def forgot_password(request):
+#     if request.method == 'POST':
+#         email = request.POST.get('email')
+#         password = request.POST.get('Password')
+#         try:
+#             user = User.objects.get(username=username_login)
+#         except User.DoesNotExist:
+#             # User with the provided email does not exist
+#             return HttpResponse('DoesNotExist')  # Redirect to the forgot password page
+#
+#         # Generate a random value
+#         random_value = secrets.token_hex(16)
+#
+#         # Store the random value in the user's model
+#         user.reset_token = hashlib.sha1(random_value.encode('utf-8')).hexdigest()
+#         user.save()
+#
+#         # Send email to the user
+#         subject = 'Password Reset'
+#         message = f'Your password reset code: {random_value}'
+#         from_email = 'opalhasson@gmail.com'  # Replace with your email address
+#         to_email = 'opalhasson@gmail.com' #user.email
+#
+#         send_mail(subject, message, from_email, [to_email])
+#
+#         # Redirect to the password reset verification page
+#         return render(request, 'passwordChangePage.html')
+#     else:
+#         return render(request, 'passwordForgetPage.html')
+
+
+# Function to generate OTP
+def generate_otp():
+    digits = "0123456789"
+    OTP = ""
+
+    for _ in range(6):
+        OTP += random.choice(digits)
+
+    return OTP
+
+
+import smtplib
+import random
+
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+
+# Function to generate OTP
+def generate_otp():
+    digits = "0123456789"
+    OTP = ""
+
+    for _ in range(6):
+        OTP += random.choice(digits)
+
+    return OTP
+
+
 def forgot_password(request):
+    SMTP_HOST = 'smtp.gmail.com'
+    SMTP_PORT = 587
+    SMTP_USERNAME = 'opalhasson'
+    SMTP_PASSWORD = '18opal18'
+
+    # Sender and Receiver details
+    SENDER_EMAIL = 'your_email@gmail.com'
+    RECEIVER_EMAIL = 'recipient_email@gmail.com'
+
+    # Generate OTP
+    otp = generate_otp()
+
+    # Email content
+    message = MIMEMultipart()
+    message['From'] = SENDER_EMAIL
+    message['To'] = RECEIVER_EMAIL
+    message['Subject'] = 'Your OTP'
+
+    message.attach(MIMEText(f'Your OTP is: {otp}', 'plain'))
+
+    # Create SMTP session
+    session = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
+    session.starttls()
+    session.login(SMTP_USERNAME, SMTP_PASSWORD)
+
+    # Send email
+    session.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, message.as_string())
+    session.quit()
+
+    print('OTP sent successfully!')
+
+
+# View for generating OTP and sending email
+def forgot_password12(request):
+    print(request.method)
+    print(request)
     if request.method == 'POST':
         email = request.POST.get('email')
-        password = request.POST.get('Password')
-        try:
-            user = User.objects.get(username=username_login)
-        except User.DoesNotExist:
-            # User with the provided email does not exist
-            return HttpResponse('DoesNotExist')  # Redirect to the forgot password page
+        print("opal")
+        print(email)
 
-        # Generate a random value
-        random_value = secrets.token_hex(16)
+        # Generate OTP
+        otp = generate_otp()
 
-        # Store the random value in the user's model
-        user.reset_token = hashlib.sha1(random_value.encode('utf-8')).hexdigest()
-        user.save()
+        # Email content
+        message = f'Your OTP is: {otp}'
+        email_subject = 'Your OTP'
+        email_sender = settings.EMAIL_HOST_USER
+        email_receiver = email
 
-        # Send email to the user
-        subject = 'Password Reset'
-        message = f'Your password reset code: {random_value}'
-        from_email = 'opalhasson@gmail.com'  # Replace with your email address
-        to_email = 'opalhasson@gmail.com' #user.email
+        # Send email
+        Email = EmailMessage(email_subject, message, email_sender, [email_receiver])
+        print(Email)
+        Email.send()
 
-        send_mail(subject, message, from_email, [to_email])
+        # Render the template with OTP input form
+        return render(request, 'passwordChangePage.html', {'email': email})
 
-        # Redirect to the password reset verification page
-        return render(request, 'passwordChangePage.html')
-    else:
-        return render(request, 'passwordForgetPage.html')
-
+    # Render the template with the email input form
+    return render(request, 'passwordForgetPage.html')
 
 
 def new_register(request):
