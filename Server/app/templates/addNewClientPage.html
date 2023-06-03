@@ -197,13 +197,14 @@
     </section>
 
     <!-- sign-up section -->
-    <section class="sign-up">
+    <section class="sign-up" action="http://127.0.0.1:8000/app/system/" method="GET">
         <p class="sign-up-para">Sign up for our newsletter and get 10% off your first purchase</p>
         <!-- the form itself -->
-        <form class="sign-up-form">
+        <form class="sign-up-form" action="" method="POST">
+            {% csrf_token %}
 
             <div class="form-input">
-                <input type="ClientName" name="user-name" id="user-name" placeholder="Client Name" required>
+                <input type="ClientName" name="ClientName" id="ClientName" placeholder="Client Name" required>
                 <span>!</span>
                 <p class="warning">User name cannot be empty</p>
             </div>
@@ -215,12 +216,21 @@
             </div>
 
             <div class="form-input">
-                <input type="PhoneNumber" name="Password" id="Password" placeholder="Phone Number" required>
+                <input type="PhoneNumber" name="PhoneNumber" id="PhoneNumber" placeholder="Phone Number" required>
                 <span>!</span>
                 <p class="warning">Password cannot be empty</p>
             </div>
 
             <input class="submit-btn" type="submit" value="add client">
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-danger">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+
             <p class="form-term">By clicking the button, you are agreeing to our <span>Terms and Services</span></p>
             <closeform></closeform>
         </form>

@@ -188,6 +188,8 @@
 
 
 
+
+
     </style>
 </head>
 
@@ -200,18 +202,28 @@
     </section>
 
     <!-- sign-up section -->
-    <section class="sign-up" action="http://127.0.0.1:8000/app/system/" method="GET">
+    <section class="sign-up" action="http://127.0.0.1:8000/app/login/ver_otp/" method="GET">
         <p class="sign-up-para">Sign up for our newsletter and get 10% off your first purchase</p>
         <!-- the form itself -->
-        <form class="sign-up-form" action="http://127.0.0.1:8000/app/client_list/" method="GET">
-            <input class="submit-btn" type="submit" value="list of clients">
-        </form>
-        <form class="sign-up-form" action="http://127.0.0.1:8000/app/change_pass/" method="GET">
-            <input class="submit-btn" type="submit" value="change password">
-        </form>
-        <form class="sign-up-form" action="http://127.0.0.1:8000/app/add_client/" method="GET">
-            <input class="submit-btn" type="submit" value="add a new client">
+        <form class="sign-up-form" action="" method="POST">
+            {% csrf_token %}
+
+            <div class="form-input">
+                <input type="email" name="email" id="email" placeholder="Email Address" required>
+                <span>!</span>
+                <p class="warning">Looks like this is not an email</p>
+            </div>
+
+            <input class="submit-btn" type="submit" value="Change Password">
             <closeform></closeform>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-danger">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
         </form>
     </section>
 </main>
