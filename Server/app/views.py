@@ -60,7 +60,7 @@ def register(request):
 
             if User.objects.get_by_natural_key(username) is not None:
                 # Optionally, you can perform additional actions with the created user
-                Profile = UserProfile(user = user)
+                Profile = UserProfile(user = user,numOfTry = 0)
                 Profile.save()
                 return render(request, 'systemScreenPage.html')
             else:
