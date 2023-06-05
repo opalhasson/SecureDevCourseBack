@@ -18,7 +18,7 @@ import random
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from .models import Client
+from .models import Client, UserProfile
 
 username_login = ""
 user_otp = ""
@@ -37,6 +37,10 @@ def userOTP(OTP):
 def getUserOTP():
     return user_otp
 
+
+def system(request):
+    return render(request, 'systemScreenPage.html')
+
 def register(request):
     if request.method == 'POST':
         username = request.POST.get('UserName')
@@ -52,11 +56,12 @@ def register(request):
             salt = hmac.new(b'secret_key', username.encode('utf-8'), hashlib.sha256).hexdigest().encode('utf-8')
             hashed_password = hmac.new(salt, password.encode('utf-8'), hashlib.sha256).hexdigest()
 
-            User.objects.create_user(username=username, email=email, password=hashed_password)
+            user = User.objects.create_user(username=username, email=email, password=hashed_password)
 
             if User.objects.get_by_natural_key(username) is not None:
                 # Optionally, you can perform additional actions with the created user
-                username_login = username.__str__()
+                Profile = UserProfile(user = user)
+                Profile.save()
                 return render(request, 'systemScreenPage.html')
             else:
                 return HttpResponse("Invalid request method")
@@ -78,6 +83,7 @@ def login(request):
             # User is authenticated, log them in
             return render(request, 'systemScreenPage.html')
         else:
+            #liran
             # Authentication failed
             messages.error(request, 'Invalid username or password.')
         # Render the login page
@@ -184,10 +190,6 @@ def ver_otp(request):
         # Render the login page
     return render(request, 'verOTPPage.html')
 
-def new_register(request):
-    return render(request, 'newRegisterPage.html')
-
-
 def register_user(self, password):
     if len(password) < self.PASS_MIN_LENGTH:
         return "Password too short"
@@ -207,5 +209,3 @@ def register_user(self, password):
     return ""
 
 
-def system(request):
-    return render(request, 'systemScreenPage.html')
