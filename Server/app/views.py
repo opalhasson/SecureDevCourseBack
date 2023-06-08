@@ -19,6 +19,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from html import escape
 from .models import Client, UserProfile
+from django.contrib.auth import login as django_login
 
 username_login = ""
 user_otp = ""
@@ -71,24 +72,6 @@ def register(request):
         # Render the login page
     return render(request, 'newRegisterPage.html')
 
-# def login(request):
-#     if request.method == 'POST':
-#         username = request.POST.get('UserName')
-#         password = request.POST.get('Password')
-#
-#         # Perform authentication
-#         user = authenticate(request, username=username, password=password)
-#
-#         if user is not None:
-#             # User is authenticated, log them in
-#             return render(request, 'systemScreenPage.html')
-#         else:
-#             #liran
-#             # Authentication failed
-#             messages.error(request, 'Invalid username or password.')
-#         # Render the login page
-#     return render(request, 'loginPage.html')
-
 def login(request):
     if request.method == 'POST':
         username = request.POST.get('UserName')
@@ -98,6 +81,8 @@ def login(request):
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
+            print(user)
+            django_login(request, user)
             # User is authenticated, log them in
             user_profile, _ = UserProfile.objects.get_or_create(user=user)
             user_profile.zeroNumOfTry()  # Reset the number of login attempts using the instance method
@@ -123,6 +108,16 @@ def login(request):
     return render(request, 'loginPage.html')
 
 def change_pass(request):
+    if request.method == 'POST':
+
+        new_password = request.POST.get('newPassword')
+
+        user = request.user
+
+        user.set_password(new_password)
+        user.save()
+        messages.error(request, 'Password changed successfully.')
+
     return render(request, 'passwordChangePage.html')
 
 def add_client(request):
