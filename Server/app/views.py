@@ -169,6 +169,39 @@ def add_client_safe(request):
 
     return render(request, 'addNewClientPage.html')
 
+def login_safe(request):
+    if request.method == 'POST':
+        username = request.POST.get('UserName')
+        password = request.POST.get('Password')
+
+        # Perform authentication
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            # User is authenticated, log them in
+            user_profile, _ = UserProfile.objects.get_or_create(user=user)
+            user_profile.zeroNumOfTry()  # Reset the number of login attempts using the instance method
+            return render(request, 'systemScreenPage.html')
+        else:
+            try:
+                user_profile = UserProfile.objects.get(user__username=username)  # Using the correct field name
+                user_profile.incNumOfTry()  # Increase the number of login attempts using the instance method
+
+                if user_profile.getNumOfTry() > PasswordConfig.HISTORY:
+                    # Maximum login attempts exceeded
+                    messages.error(request, 'Maximum login attempts exceeded. Please try again later.')
+                    return render(request, 'loginPage.html')  # Redirect back to the login page
+
+                else:
+                    # Authentication failed
+                    messages.error(request, 'Invalid username or password,please try again.')
+            except UserProfile.DoesNotExist:
+                # Authentication failed
+                messages.error(request, 'Invalid username or password - check out user or password.')
+
+    # Render the login page
+    return render(request, 'loginPage.html')
+
 
 def client_list(request):
     clients = Client.objects.all()
