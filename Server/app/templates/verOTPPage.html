@@ -190,6 +190,7 @@
 
 
 
+
     </style>
 </head>
 
@@ -205,7 +206,7 @@
     <section class="sign-up" action="" method="GET">
         <p class="sign-up-para">Sign up for our newsletter and get 10% off your first purchase</p>
         <!-- the form itself -->
-        <form class="sign-up-form" action="http://127.0.0.1:8000/app/login/ver_otp/" method="POST">
+        <form class="sign-up-form" action="https://127.0.0.1:8000/app/login/ver_otp/" method="POST">
             {% csrf_token %}
 
             <div class="form-input">
@@ -216,6 +217,7 @@
 
 
             <input class="submit-btn" type="submit" value="verified OTP">
+            <p class="form-term">This Project made by <span>Opal, Daniel & Liran</span></p>
             <closeform></closeform>
 
             {% if messages %}

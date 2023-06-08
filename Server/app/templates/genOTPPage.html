@@ -190,6 +190,7 @@
 
 
 
+
     </style>
 </head>
 
@@ -202,8 +203,7 @@
     </section>
 
     <!-- sign-up section -->
-    <section class="sign-up" action="http://127.0.0.1:8000/app/login/ver_otp/" method="GET">
-        <p class="sign-up-para">Sign up for our newsletter and get 10% off your first purchase</p>
+    <section class="sign-up" action="https://127.0.0.1:8000/app/login/ver_otp/" method="GET">
         <!-- the form itself -->
         <form class="sign-up-form" action="" method="POST">
             {% csrf_token %}
@@ -214,7 +214,8 @@
                 <p class="warning">Looks like this is not an email</p>
             </div>
 
-            <input class="submit-btn" type="submit" value="Change Password">
+            <input class="submit-btn" type="submit" value="Send OTP To Email">
+            <p class="form-term">This Project made by <span>Opal, Daniel & Liran</span></p>
             <closeform></closeform>
 
             {% if messages %}

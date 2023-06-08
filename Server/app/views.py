@@ -17,7 +17,7 @@ import smtplib
 import random
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-
+from html import escape
 from .models import Client, UserProfile
 
 username_login = ""
@@ -60,8 +60,8 @@ def register(request):
 
             if User.objects.get_by_natural_key(username) is not None:
                 # Optionally, you can perform additional actions with the created user
-                Profile = UserProfile(user = user,numOfTry = 0)
-                Profile.save()
+                profile = UserProfile(user = username,numOfTry = 0)
+                profile.save()
                 return render(request, 'systemScreenPage.html')
             else:
                 return HttpResponse("Invalid request method")
@@ -70,6 +70,24 @@ def register(request):
 
         # Render the login page
     return render(request, 'newRegisterPage.html')
+
+# def login(request):
+#     if request.method == 'POST':
+#         username = request.POST.get('UserName')
+#         password = request.POST.get('Password')
+#
+#         # Perform authentication
+#         user = authenticate(request, username=username, password=password)
+#
+#         if user is not None:
+#             # User is authenticated, log them in
+#             return render(request, 'systemScreenPage.html')
+#         else:
+#             #liran
+#             # Authentication failed
+#             messages.error(request, 'Invalid username or password.')
+#         # Render the login page
+#     return render(request, 'loginPage.html')
 
 def login(request):
     if request.method == 'POST':
@@ -81,12 +99,27 @@ def login(request):
 
         if user is not None:
             # User is authenticated, log them in
+            user_profile, _ = UserProfile.objects.get_or_create(user=user)
+            user_profile.zeroNumOfTry()  # Reset the number of login attempts using the instance method
             return render(request, 'systemScreenPage.html')
         else:
-            #liran
-            # Authentication failed
-            messages.error(request, 'Invalid username or password.')
-        # Render the login page
+            try:
+                user_profile = UserProfile.objects.get(user=username)
+                user_profile.incNumOfTry()  # Increase the number of login attempts using the instance method
+
+                if user_profile.getNumOfTry() > PasswordConfig.HISTORY:
+                    # Maximum login attempts exceeded
+                    messages.error(request, 'Maximum login attempts exceeded. Please try again later.')
+                    return render(request, 'loginPage.html')  # Redirect back to the login page
+
+                else:
+                    # Authentication failed
+                    messages.error(request, 'Invalid username or password,please try again.')
+            except UserProfile.DoesNotExist:
+              # Authentication failed
+              messages.error(request, 'Invalid username or password - check out user or password.')
+
+    # Render the login page
     return render(request, 'loginPage.html')
 
 def change_pass(request):
@@ -113,6 +146,29 @@ def add_client(request):
             return messages.error(request, 'Client allready exist !')
 
     return render(request, 'addNewClientPage.html')
+
+def add_client_safe(request):
+    if request.method == 'POST':
+        ClientName = escape(request.POST.get('ClientName'))
+        email = escape(request.POST.get('email'))
+        PhoneNumber = escape(request.POST.get('PhoneNumber'))
+        client = None
+        try:
+            client = Client.objects.get(email=email)
+            # Handle the case when a matching client is found
+            # For example, you can update the existing client or display a message
+        except Client.DoesNotExist:
+            # Handle the case when no matching client is found
+            client = Client.objects.create(name=ClientName, email=email, PhoneNumber=PhoneNumber)
+
+        if client is not None:
+            # Optionally, you can perform additional actions with the created user
+            return render(request, 'systemScreenPage.html')
+        else:
+            return messages.error(request, 'Client already exists!')
+
+    return render(request, 'addNewClientPage.html')
+
 
 def client_list(request):
     clients = Client.objects.all()

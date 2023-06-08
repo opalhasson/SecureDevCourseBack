@@ -24,13 +24,34 @@ class Client(models.Model):
 
 
 
+# class UserProfile(models.Model):
+#     #user = models.OneToOneField(User,on_delete=models.CASCADE)
+#
+#     numOfTry = models.IntegerField(default=0)
+#
+#     def incNumOfTry(self):
+#         self.numOfTry += 1
+#         self.save()
+#
+#     def zeroNumOfTry(self):
+#         self.numOfTry = 0
+#         self.save()
+#     #other fields here
+#
+#     def _str_(self):
+#           return "%s's profile" % self.user
+
+
 class UserProfile(models.Model):
-    user = models.OneToOneField(User,on_delete=models.CASCADE)
+    user = models.CharField(max_length=30,primary_key=True)
     numOfTry = models.IntegerField(default=0)
 
     def incNumOfTry(self):
         self.numOfTry += 1
         self.save()
+
+    def getNumOfTry(self):
+        return self.numOfTry
 
     def zeroNumOfTry(self):
         self.numOfTry = 0
@@ -38,9 +59,6 @@ class UserProfile(models.Model):
     #other fields here
 
     def _str_(self):
-          return "%s's profile" % self.user
-
-
-
+        return "%s's profile" % self.user
 
 
